@@ -157,16 +157,9 @@ def load_sounds(game):
         sound.setVolume(0.35)
         game["sounds"][cue] = sound
 
-    music = QSoundEffect(game["window"])
-    music.setSource(QUrl.fromLocalFile(str(sounds_dir / "drive-loop.wav")))
-    music.setLoopCount(QSoundEffect.Loop.Infinite.value)
-    music.setVolume(0.23)
-    game["music"] = music
-
 
 def stop_game(game):
     game["timer"].stop()
-    game["music"].stop()
     if game["reader"] is not None:
         close_controller(game["reader"])
 
@@ -209,11 +202,6 @@ def build_toolbar(game, name):
         lambda enabled: game["sound_button"].setText("Sound on" if enabled else "Sound off")
     )
     top.addWidget(game["sound_button"])
-    game["music_button"] = QPushButton("Music on")
-    game["music_button"].setCheckable(True)
-    game["music_button"].setChecked(True)
-    game["music_button"].toggled.connect(lambda enabled: toggle_music(game, enabled))
-    top.addWidget(game["music_button"])
     reload_button = QPushButton("Reload")
     reload_button.setToolTip("Reload viewer")
     reload_button.clicked.connect(lambda: reload(game))
@@ -227,20 +215,27 @@ def build_hud(game):
     game["location"].setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
     game["heading"] = label("—", "heading")
     game["heading"].setAlignment(Qt.AlignmentFlag.AlignCenter)
+    game["heading"].setFixedHeight(38)
     game["gear"] = label("N", "gear")
     game["gear"].setAlignment(Qt.AlignmentFlag.AlignCenter)
+    game["gear"].setFixedHeight(38)
     game["gear"].setToolTip("Drive gear: N neutral, D forward, R reverse")
     game["direction"] = label("Route —", "direction")
     game["direction"].setWordWrap(True)
     game["direction"].setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+    center = Qt.AlignmentFlag.AlignVCenter
+    location = QHBoxLayout()
+    location.setSpacing(12)
+    location.addWidget(game["location"], stretch=1, alignment=center)
+    location.addWidget(game["gear"], alignment=center)
     data = QHBoxLayout()
-    data.setSpacing(18)
-    data.addWidget(game["location"], stretch=3)
-    data.addWidget(game["gear"])
-    data.addWidget(game["heading"])
-    data.addWidget(game["direction"], stretch=2)
+    data.setSpacing(12)
+    data.addLayout(location, stretch=1)
+    data.addWidget(game["heading"], alignment=center)
+    data.addWidget(game["direction"], stretch=1, alignment=center)
     game["status"] = label("", "status")
     game["status"].setWordWrap(True)
+    game["status"].hide()
     hints = QHBoxLayout()
     hints.setSpacing(10)
     for binding, action in (MOCK_HINTS if game["mock"] else CONTROLLER_HINTS):
@@ -272,12 +267,10 @@ def play_sound(game, cue):
         game["sounds"][cue].play()
 
 
-def toggle_music(game, enabled):
-    game["music_button"].setText("Music on" if enabled else "Music off")
-    if enabled and game["viewer_ready"]:
-        game["music"].play()
-    else:
-        game["music"].stop()
+def set_status(game, message):
+    status = game["status"]
+    status.setText(message)
+    status.setVisible(bool(message))
 
 
 def show_map(game):
@@ -299,7 +292,7 @@ def on_map_toggled(game, opened):
 def on_location_changed(game, state):
     game["nav"] = new_navigation()
     update_state(game, state)
-    game["status"].setText("New location loaded.")
+    set_status(game, "")
     play_sound(game, "arrive")
 
 
@@ -312,7 +305,7 @@ def reload(game):
     game["heading"].setText("—")
     game["gear"].setText("N")
     game["direction"].setText("Route —")
-    game["status"].setText("Loading Street View…")
+    set_status(game, "Loading Street View…")
     game["startup_timer"].start()
     game["view"].load(game["url"])
     game["view"].setFocus()
@@ -332,7 +325,7 @@ def on_viewer_failure(game, message):
     game["heading"].setText("—")
     game["gear"].setText("N")
     game["direction"].setText("Route —")
-    game["status"].setText(message)
+    set_status(game, message)
 
 
 def update_state(game, state):
@@ -354,14 +347,12 @@ def update_state(game, state):
         game["startup_timer"].stop()
         game["viewer_ready"] = True
         game["map_button"].setEnabled(not game["map_open"])
-        if game["music_button"].isChecked() and not game["music"].isPlaying():
-            game["music"].play()
-        game["status"].setText("Controls paused." if game["paused"] else "Ready.")
+        set_status(game, "Controls paused." if game["paused"] else "")
     game["location"].setText(state.get("location") or "Unknown location")
     heading = nav["heading"]
     direction_index = int((heading + 22.5) / 45) % len(COMPASS_DIRECTIONS)
     cardinal = COMPASS_DIRECTIONS[direction_index]
-    game["heading"].setText(f"{cardinal}   {round(heading) % 360:03d}°")
+    game["heading"].setText(f"{cardinal} {round(heading) % 360:03d}°")
     update_direction(game)
 
 
@@ -389,12 +380,7 @@ def on_move(game, error, state):
     game["gear"].setText("N")
     update_state(game, state)
     game["map_button"].setEnabled(game["viewer_ready"] and not game["map_open"])
-    if moved:
-        count = len(nav["history"])
-        text = f"Moved · {count} in history"
-    else:
-        text = error or "The requested panorama is unavailable."
-    game["status"].setText(text)
+    set_status(game, "" if moved else error or "The requested panorama is unavailable.")
     play_sound(game, "move" if moved else "blocked")
 
 
@@ -447,7 +433,7 @@ def poll(game):
     if not game["map_open"] and "pause" in actions:
         game["paused"] = not game["paused"]
         if game["viewer_ready"]:
-            game["status"].setText("Controls paused." if game["paused"] else "Controls resumed.")
+            set_status(game, "Controls paused." if game["paused"] else "")
         play_sound(game, "select")
         if not game["paused"]:
             game["bridge"].requestState.emit()
@@ -493,7 +479,7 @@ def handle_driving_input(game, sample, now: float, elapsed: float):
         step = 1 if "next" in actions else -1
         route = select_direction(nav, step)
         update_direction(game)
-        game["status"].setText("Press ✕ or Enter to confirm." if route else "No connected routes here.")
+        set_status(game, "Press ✕ or Enter to confirm." if route else "No connected routes here.")
         play_sound(game, "select" if route else "blocked")
 
     if not any(sample["stick"]):
@@ -508,7 +494,7 @@ def handle_driving_input(game, sample, now: float, elapsed: float):
     for action in ("back", "confirm", "forward"):
         if action in actions:
             movement, message = start_move(nav, action)
-            game["status"].setText(message)
+            set_status(game, message if movement is None else "")
             if movement is not None:
                 game["gear"].setText("R" if movement["backward"] else "D")
                 game["map_button"].setEnabled(False)
