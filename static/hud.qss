@@ -1,0 +1,24 @@
+QWidget { background: #101719; color: #edf4eb; font-size: 13px; }
+QFrame#hud { border-top: 3px solid #c7fa66; background: #17201f; }
+QLabel { background: transparent; }
+QLabel#title { color: #c7fa66; font-size: 22px; font-weight: 850; font-style: italic; }
+QLabel#location { font-size: 17px; font-weight: 700; }
+QLabel#heading { min-width: 132px; padding: 6px 10px; color: #c7fa66;
+                 font-size: 20px; font-weight: 800; background: #0f1714;
+                 border-left: 3px solid #c7fa66; border-right: 3px solid #c7fa66; }
+QLabel#gear { color: #151b10; background: #c7fa66; border-radius: 4px;
+              font-size: 20px; font-weight: 850; min-width: 36px; min-height: 36px; }
+QLabel#direction { color: #ede3cd; font-weight: 600; }
+QLabel#connection { color: #bed9cc; }
+QLabel#binding { padding: 3px 8px; border: 1px solid #56674d; border-radius: 4px;
+                 color: #c7fa66; font-weight: 700; }
+QLabel#hint { color: #bac7c2; font-size: 11px; }
+QLabel#status { color: #c7fa66; }
+QPushButton { background: #262c2d; border: 1px solid #4b5352;
+              border-radius: 5px; padding: 6px 10px; font-weight: 600; }
+QPushButton#map { background: #c7fa66; color: #151b10; border-color: #c7fa66; }
+QPushButton:hover, QPushButton:focus { border-color: #c7fa66; }
+QPushButton#map:hover, QPushButton#map:focus { background: #e3ffad; }
+QPushButton:disabled, QPushButton#map:disabled {
+    background: #262c2d; color: #a0a9a5; border-color: #4b5352;
+}
