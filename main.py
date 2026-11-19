@@ -1,5 +1,3 @@
-"""Run the desktop application, coordinating input, navigation, and Street View."""
-
 import argparse
 import sys
 from math import isfinite
