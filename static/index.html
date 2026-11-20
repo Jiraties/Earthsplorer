@@ -1,43 +1,68 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Earthsplorer</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css" />
     <script src="/qwebchannel.js" defer></script>
     <script src="/app.js" defer></script>
-</head>
-<body>
+  </head>
+  <body>
     <main id="panorama" aria-label="Google Street View panorama"></main>
     <p id="message" role="status">Connecting to the viewer…</p>
     <dialog id="locations" aria-labelledby="map-title">
-        <header>
-            <h1 id="map-title">Choose a location</h1>
-            <button id="close-map" type="button" aria-label="Close map">Close</button>
-        </header>
-        <form id="place-search">
-            <input id="place-query" type="search" aria-label="Search places or coordinates"
-                   placeholder="Search a place, address, or coordinates" required>
-            <button type="submit">Search</button>
-        </form>
-        <div id="map-stage">
-            <div id="world-map" aria-label="Street View location map"></div>
-            <span id="map-reticle" aria-hidden="true"></span>
+      <header>
+        <h1 id="map-title">Choose a location</h1>
+        <button id="close-map" type="button" aria-label="Close map">
+          Close
+        </button>
+      </header>
+      <form id="place-search">
+        <input
+          id="place-query"
+          type="search"
+          aria-label="Search places or coordinates"
+          placeholder="Search a place, address, or coordinates"
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div id="map-stage">
+        <div id="world-map" aria-label="Street View location map"></div>
+        <span id="map-reticle" aria-hidden="true"></span>
+      </div>
+      <dl id="map-controls">
+        <div>
+          <dt>Left stick</dt>
+          <dd>Pan</dd>
         </div>
-        <dl id="map-controls">
-            <div><dt>Left stick</dt><dd>Pan</dd></div>
-            <div><dt>L2 / R2</dt><dd>Zoom out / in</dd></div>
-            <div><dt>✕</dt><dd>Drive here</dd></div>
-            <div><dt>○ / Touchpad</dt><dd>Close map</dd></div>
-        </dl>
-        <p id="map-status" role="status">Click a road on the map or pick a preset.</p>
-        <div class="presets" aria-label="Preset locations">
-            <button id="drive-here" type="button">Drive here</button>
-            <button type="button" data-lat="13.73830" data-lng="100.52956">Chulalongkorn University</button>
-            <button type="button" data-lat="13.74298" data-lng="100.49870">Suankularb School</button>
-            <button type="button" data-lat="13.75650" data-lng="100.50210">Democracy Monument</button>
+        <div>
+          <dt>L2 / R2</dt>
+          <dd>Zoom out / in</dd>
         </div>
+        <div>
+          <dt>✕</dt>
+          <dd>Drive here</dd>
+        </div>
+        <div>
+          <dt>○ / Touchpad</dt>
+          <dd>Close map</dd>
+        </div>
+      </dl>
+
+      <div class="presets" aria-label="Preset locations">
+        <button id="drive-here" type="button">Drive here</button>
+        <button type="button" data-lat="13.73830" data-lng="100.52956">
+          Chulalongkorn University
+        </button>
+        <button type="button" data-lat="13.74298" data-lng="100.49870">
+          Suankularb School
+        </button>
+        <button type="button" data-lat="13.75650" data-lng="100.50210">
+          Democracy Monument
+        </button>
+      </div>
     </dialog>
-</body>
+  </body>
 </html>
